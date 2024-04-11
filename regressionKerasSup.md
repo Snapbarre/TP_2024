@@ -16,6 +16,14 @@ pour faire un script complet d'un classifieur MLP binaire dans lequel vous assur
 3. Lancement de l'entrainement
 4. Evaluation du modèle obtenu
 
+```
+dataset = loadtxt('dataset_diabetes.csv', delimiter=',')
+print(dataset.shape)
+x = dataset[:,:-1]
+y = dataset[:,-1:].reshape(-1)
+
+```
+
 ## Spécification de la base de validation
 
 Durant l'apprentissage, les données de la base sont présentées au réseau un nombre __n__ de fois (__n__ epochs). La base est découpée en plusieurs
@@ -58,9 +66,9 @@ Pour cela nous allons utiliser la librairie sklearn et la fonction train_test_sp
 ```
 # Création des sous ensemble de validation
 from sklearn.model_selection import train_test_split
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=2)
+x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2, random_state=2)
 ```
-Dans cet exemple, nous créons les deux sous-ensembles X_train et X_val et leurs labels respectifs y_train et y_val. Les échantillons de la base de validation X_val représentent 20% de la base d'apprentissage initiale X. L'extraction est réalisée de manière aléatoire en précisant le seed du générateur de nombres pseudo-aléatoires (random_state=2).En changeant cette valeur, vous obtiendrez des sous-ensembles différents.
+Dans cet exemple, nous créons les deux sous-ensembles x_train et X_val et leurs labels respectifs y_train et y_val. Les échantillons de la base de validation X_val représentent 20% de la base d'apprentissage initiale X. L'extraction est réalisée de manière aléatoire en précisant le seed du générateur de nombres pseudo-aléatoires (random_state=2).En changeant cette valeur, vous obtiendrez des sous-ensembles différents.
 
 ## Affichage des courbes d'apprentissage
 
@@ -123,12 +131,12 @@ model.load_weights("regressionMLP.weights.h5")
 Ainsi, il est possible d'inférer le réseau chargé sur de nouvelles données de la manière suivante :
 ```
 # Prédiction sur le sous-ensemble d'apprentissage
-res=model.predict(X_train)
-res2=restored_model.predict(X_train)
+res=model.predict(x_train)
+res2=restored_model.predict(x_train)
 
 # Prédiction sur deux nouvelles instances X_1 et X_2
-X_1=[5.8,2.6,4.0,1.2]
-X_2=[6.3,3.3,6.0,2.5]
+X_1=np.array([5.8,2.6,4.0,1.2,2.4,1.8,6.2,0.1]).reshape((1,-1))
+X_2=np.array([6.3,3.3,6.0,2.5,2.4,5.8,1.7,0.7]).reshape((1,-1))
 res1=model.predict([X_1])
 res2=model.predict([X_2])
 print('classe {0} and classe {1}'.format(round(res1[0,0]),round(res2[0,0])))
@@ -148,15 +156,15 @@ checkpoint = keras.callbacks.ModelCheckpoint(filepath="./weights/weights-{epoch:
 callbacks = [checkpoint]
 
 # appel de la nouvelle fonction de fit()
-history=model.fit(X, y, epochs=200, batch_size=10, shuffle=False, validation_split=0.2, callbacks=callbacks, verbose=2)
+history=model.fit(x_train, y_train, epochs=200, batch_size=10, shuffle=False, validation_split=0.2, callbacks=callbacks, verbose=2)
 ```
 
 Il est possible de changer la valeur qui est monitorée pour créer la condition de sauvegarde : ```fit(...,monitor=val_accuracy,mode="max",verbose=1)```
 
 **Question : vérifier la bonne sauvegarde des poids dans le dossier que vous avez préciseé (ici ./weights/weights-032-0.4321.hdf5)**
 
-**Question : une fois l'entraînement terminé, charger le dernier fichier de poids sauvegardé avec la callback et inférer ce réseau sur la base X_train afin d'en calculer la précision
-comme vous l'avez fait dans le sujet précédent**
+**Question : une fois l'entraînement terminé, charger le dernier fichier de poids sauvegardé avec la callback et inférer ce réseau sur la base x_train afin d'en calculer la précision**
+
 
 ## Standardisation des données
 
@@ -167,13 +175,13 @@ cette variabilité sur l'entraînement. Nous la réalisons avec la bibliothèque
 ```
 from sklearn.preprocessing import StandardScaler
 
-# en reprenant les X_train, X_val, y_train, y_val précédents
+# en reprenant les x_train, X_val, y_train, y_val précédents
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
+x_train_scaled = scaler.fit_transform(x_train)
 X_val_scaled = scaler.fit_transform(X_val)
 
 # entraînement sur le dataset standardisé
-history=model.fit(X_train_scaled, y_train, epochs=350, batch_size=10, shuffle=False, validation_data=(X_val_scaled,y_val), callbacks=callbacks)
+history=model.fit(x_train_scaled, y_train, epochs=350, batch_size=10, shuffle=False, validation_data=(X_val_scaled,y_val), callbacks=callbacks)
 ```
 
 Le modèle ainsi appris n'est alors inférable que sur des nouvelles données qui ont été standardisées également avec les mêmes transformations (moyenne et variance). En reprenant
@@ -192,8 +200,8 @@ Dans la plupart des cas, vous aurez entrainé le réseau sur une base d'apprenti
 ```
 std  = np.sqrt(scaler.var_)
 mean = scaler.mean_
-X=np.array([[6.3,3.3,6.0,2.5]])
-X_1_scaled = (X_1 - mean)) / std
+X=np.array([[6.,148.,72.,35.,0.,33.6,0.627,50.]])
+X_1_scaled = (X_1 - mean) / std
 
 res1=model.predict([X_1_scaled])
 print('classe {0} and classe {1}'.format(round(res1[0,0]),round(res2[0,0])))
@@ -210,16 +218,11 @@ Pour cela vous allez devoir faire les modifications suivante.
 3. Changer la fonction de loss du model.compile(...) : loss="categorical_crossentropy"
 4. Après l'entraînement sur l'ensemble des échantillons X (avec label y_cat), lancer une évaluation du modèle sur ce même ensemble et calculer sa précision.
 
-Pour terminer, vous afficherez pour chaque échantillon, la prédiction du modèle et le label attendu : 
+Pour terminer, vous afficherez pour chaque échantillon, la prédiction du modèle et le label attendu, utilisez la fonction ```numpy.argmax``` pour extraires les prédictions: 
 
 ```
 # Calculer la prédiction de la classe pour tous les échantillons
-predictions = (model.predict(X) > 0.5).astype(int)
-
-# Afficher les prédictions et les labels
-for i in range(150):
-  if (np.abs((predictions[i]-y_cat[i])).sum())!=0:
-    print(X[i],"-",predictions[i],"-", y_cat[i])
+predictions = model.predict(X).astype(int)
 ```
 
 ## Passage à la dataset MNIST
@@ -229,7 +232,7 @@ Appliquer le réseau MLP multi-classes précédent à cette dataset.
 
 Pour charger la dataset : 
 ```
-import tf.keras.datasets.mnist as mnist
+import tensorflow.keras.datasets.mnist as mnist
 
 (x_train, y_train),(x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0

@@ -113,7 +113,9 @@ class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
 Le chargement et la normalisation des images s'effectue de la même manière que pour MNIST :
 
 ```
-(x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
+import tensorflow.keras.datasets.cifar10 as cifar10
+
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
 
 # Normalisation des valeurs RGBdes pixels
 x_train, x_test = x_train / 255.0, x_test / 255.0
@@ -159,12 +161,34 @@ Nous allons étudier plus précisément les résultats donnés par le réseau ap
 Voici les lignes de code (ici pour la classe "truck") :
 
 ```
-import os
-if not os.path.isfile('pml_utils.py'):
-  !wget https://raw.githubusercontent.com/csc-training/intro-to-dl/master/day1/pml_utils.py
+def show_failures(predictions, y_test, X_test, trueclass=None,
+                  predictedclass=None, maxtoshow=10, im_shape = (32, 32, 3)):
+    import matplotlib.pyplot as plt
 
-from pml_utils import show_failures
+    if len(predictions.shape) > 1:
+        predictions = np.argmax(predictions, axis=1)
+    errors = predictions != y_test.reshape(predictions.shape)
+    print(errors.shape)
+    print('Showing max', maxtoshow, 'first failures. The predicted class is '
+          'shown first and the correct class in parenthesis.')
+    ii = 0
+    plt.figure(figsize=(maxtoshow, 1))
+    for i in range(X_test.shape[0]):
+        if ii >= maxtoshow:
+            break
+        if errors[i]:
+            if trueclass is not None and y_test[i] != trueclass:
+                continue
+            if predictedclass is not None and predictions[i] != predictedclass:
+                continue
+            plt.subplot(1, maxtoshow, ii+1)
+            plt.axis('off')
+            plt.imshow(X_test[i, :].reshape(im_shape), cmap="gray")
+            plt.title("%s (%s)" % (predictions[i], y_test[i]))
+            ii = ii + 1
+```
 
+```
 # prédiction sur la base de test
 predictions=model.predict(x_test)
 show_failures(predictions, y_test, x_test, trueclass=9)
