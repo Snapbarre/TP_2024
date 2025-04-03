@@ -163,7 +163,23 @@ predictions = (model.predict(X) > 0.5).astype(int)
 # Second projet - application du précédent projet à un autre dataset
 
 Modifier l'ensemble du script précédent en l'appliquant aux données contenues dans le fichier dataset_diabets.csv.
-Pour cela vous utiliserez la fonction ```dataset = loadtxt('dataset_diabetes.csv', delimiter=',')```
+Pour cela vous utiliserez le code suivant pour uploader vos fichiers:
+
+```
+from google.colab import files
+
+uploaded = files.upload()
+
+for fn in uploaded.keys():
+  print('User uploaded file "{name}" with length {length} bytes'.format(
+      name=fn, length=len(uploaded[fn])))
+
+for key in uploaded:
+  with open(k,'wb') as f:
+      f.write(uploaded[k])
+```
+
+suivi de la fonction ```dataset = loadtxt('dataset_diabetes.csv', delimiter=',')```
 
 Il s'agit d'un ensemble de données d'apprentissage automatique standard du référentiel UCI Machine Learning. Il décrit les données du dossier médical des Indiens Pima et indique s'ils ont présenté ou non un diabète dans les cinq ans en fonction de certains paramètres. L'objectif est de définir un modèle capable de prédire l'état d'un patient en fonction des valeurs de ces paramètres.
 
