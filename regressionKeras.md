@@ -175,8 +175,8 @@ for fn in uploaded.keys():
       name=fn, length=len(uploaded[fn])))
 
 for key in uploaded:
-  with open(k,'wb') as f:
-      f.write(uploaded[k])
+  with open(key,'wb') as f:
+      f.write(uploaded[key])
 ```
 
 suivi de la fonction ```dataset = loadtxt('dataset_diabetes.csv', delimiter=',')```

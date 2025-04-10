@@ -42,13 +42,13 @@ from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 
 # Couche "feature map"
 model = models.Sequential()
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
-model.add(layers.MaxPooling2D((2, 2)))
+model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(28, 28, 1)))
+model.add(MaxPooling2D((2, 2)))
 
 # Couche classification
-model.add(layers.Flatten())
-model.add(layers.Dense(64, activation='relu'))
-model.add(layers.Dense(10))
+model.add(Flatten())
+model.add(Dense(64, activation='relu'))
+model.add(Dense(10))
 
 ```
 La couche de convolution 2D prend en entrée une image de taille 28x28 en niveau de gris (input_shape=(28,28,1)).
