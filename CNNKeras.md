@@ -39,6 +39,7 @@ Un réseau de neurones convolutifs de base est structuré en deux parties. La pr
 
 ```
 from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
+from tensorflow.keras import layers, models
 
 # Couche "feature map"
 model = models.Sequential()
